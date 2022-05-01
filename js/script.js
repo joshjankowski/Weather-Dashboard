@@ -6,8 +6,29 @@ let fiveDayObj = {};
 let incorrect = document.querySelector(".incorrect");
 let wrongText = "Invalid City";
 
+let previousSearch = [];
+
+function store(search) {
+  previousSearch.push(search);
+  console.log(previousSearch, "Saved")
+  localStorage.setItem("Previous Search", previousSearch);
+}
+
+function showPreviousSearch() {
+  let previousValue = [localStorage.getItem("Previous Search")];
+  let previousDiv = document.querySelector(".city");
+  let eachButtonContainer = document.createElement("div");
+  for (let i = 0; i < previousValue.length; i++) {
+    eachButtonContainer.innerHTML = `
+    <button class="previous-button">${previousValue[i]}</button>`
+  }
+  previousDiv.append(eachButtonContainer)
+}
+
 function getGeo(cityName) {
   let text = city.value;
+  store(text);
+  showPreviousSearch();
   let key = "010cc554e8087064e8910c4a2aa44a43";
   let limit = 1;
   cityName = text;
@@ -208,9 +229,5 @@ function showWeather(attr) {
 // };
 
 // app.init();
-
-function saveNewSearch(query) {
-    query = city.value;
-}
 
 searchButton.addEventListener("click", getGeo);

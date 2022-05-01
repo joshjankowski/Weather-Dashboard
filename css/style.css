@@ -100,3 +100,22 @@ border-style: solid;
 border-color: black;
 background-color: rgb(25, 50, 104);
 }
+
+.city {
+    display: flex;
+    flex-direction: column;
+}
+
+.previous-button {
+    margin: 0.8em;
+    background-color: rgb(59, 158, 224);
+    color: white;
+    font-size: 1em;
+    width: 100%;
+    cursor: pointer;   
+}
+
+.previous-button:hover {
+    background-color: white;
+    color: rgb(59, 158, 224);
+}
