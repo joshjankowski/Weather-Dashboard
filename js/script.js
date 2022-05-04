@@ -1,37 +1,81 @@
-// API Key - 273a1e8dfc4471421a0b08ea09bd7387
-// API Call - http://api.openweathermap.org/data/2.5/forecast?id=524901&appid=273a1e8dfc4471421a0b08ea09bd7387
 let city = document.querySelector("#city-search");
-let searchButton = document.querySelector("#search");
+let searchButton = document.querySelector(".button-search");
 let fiveDayObj = {};
 let incorrect = document.querySelector(".incorrect");
 let wrongText = "Invalid City";
+let previousValue = [];
+let eachDay = document.querySelector(".day");
+let searchedCity = [];
+let previousDiv = document.querySelector(".city"); // Grab where the previous searches will go
+let recentDiv = document.querySelector(".recent"); // Grab where the recent searches will 
+let cityLocation = document.querySelector(".current-city");
 
-let previousSearch = [];
-
+// Stores in local storage.
 function store(search) {
-  previousSearch.push(search);
-  console.log(previousSearch, "Saved")
-  localStorage.setItem("Previous Search", previousSearch);
+  let searchedCity = JSON.parse(
+    localStorage.getItem("Previous-Search" || "[]")
+  );
+  searchedCity.push(search);
+  localStorage.setItem("Previous-Search", JSON.stringify(searchedCity));
+  // console.log(search,searchedCity,  "s")
+  console.log("went ot the set", localStorage);
+  renderNew(search);
 }
 
+// Grab from local storage and get the previous searches.
 function showPreviousSearch() {
-  let previousValue = [localStorage.getItem("Previous Search")];
-  let previousDiv = document.querySelector(".city");
-  let eachButtonContainer = document.createElement("div");
-  for (let i = 0; i < previousValue.length; i++) {
-    eachButtonContainer.innerHTML = `
-    <button class="previous-button">${previousValue[i]}</button>`
+  let getSave = localStorage.getItem("Previous-Search");
+  if (getSave) {
+    searchedCity = JSON.parse(getSave);
   }
-  previousDiv.append(eachButtonContainer)
+  searchedCity.reverse();
+  renderHistory(searchedCity);
 }
 
+// Make a function that will render the most recent searches as they are typed.
+function renderNew(value) {
+  let eachButtonContainer = document.createElement("button");
+  eachButtonContainer.setAttribute("type", "button");
+  eachButtonContainer.setAttribute("data-search", value);
+  eachButtonContainer.setAttribute("class", "button-press");
+  eachButtonContainer.setAttribute("class", "button-search");
+  eachButtonContainer.textContent = value;
+  eachButtonContainer.addEventListener("click", function pressOldButtons() {
+    getGeo(value);
+  });
+  recentDiv.append(eachButtonContainer);
+}
+
+// Make a function to call from local storage and display on screen.
+function renderHistory(value) {
+  for (let i = 0; i <= 5; i++) {
+    let eachButtonContainer = document.createElement("button");
+    eachButtonContainer.setAttribute("type", "button");
+    eachButtonContainer.setAttribute("data-search", value[i]);
+    eachButtonContainer.setAttribute("class", "button-press");
+    eachButtonContainer.setAttribute("class", "button-search");
+    eachButtonContainer.textContent = value[i];
+    eachButtonContainer.addEventListener("click", function pressOldButtons() {
+      let newSearch = value[i];
+      getGeo(newSearch);
+    });
+    previousDiv.append(eachButtonContainer);
+  }
+}
+
+// Change the name of the city to Geocoding and make sure to return invalid if user inputs a city that doesn't match to anything.
 function getGeo(cityName) {
+  eachDay.innerHTML = ``;
   let text = city.value;
-  store(text);
-  showPreviousSearch();
+  if(text){
+    cityName = text;
+  } else {
+    cityName = cityName;
+  }
+  cityLocation.innerHTML = cityName;
+  store(cityName);
   let key = "010cc554e8087064e8910c4a2aa44a43";
   let limit = 1;
-  cityName = text;
 
   let url =
     "https://api.openweathermap.org/geo/1.0/direct?q=" +
@@ -63,11 +107,10 @@ function getGeo(cityName) {
     });
 }
 
-//     GoogleMaps Key = AIzaSyBR9nvY5J9vWyirr1JXTyw-timn_5RHvlA
+// Grabs the current weather forecast
 function fetchWeather(lon, lat) {
   //use the values from city to fetch the weather
   let key = "010cc554e8087064e8910c4a2aa44a43";
-  console.log(lat);
   let lang = "en";
   let units = "metric";
   let url =
@@ -85,7 +128,6 @@ function fetchWeather(lon, lat) {
   fetch(url)
     .then((response) => {
       console.log(response.status);
-      // if(!resp.ok) throw new Error(resp.statusText);
       return response.json();
     })
     .then((data) => {
@@ -95,13 +137,12 @@ function fetchWeather(lon, lat) {
         humidity: data.current.humidity,
         clouds: data.current.clouds,
       };
-      // console.log(data.current.humidity, "humidity")
-      // console.log(data, "second set data")
       showWeather(cityAttributes);
     })
     .catch(console.err);
 }
 
+// Create a five day forecast function.
 function fiveDay(lon, lat) {
   let key = "010cc554e8087064e8910c4a2aa44a43";
   let url =
@@ -126,18 +167,22 @@ function fiveDay(lon, lat) {
       for (let i = 0; i < list.length; i++) {
         let dayData = list[i];
         let changeFormat = new Date(dayData.dt_txt);
-        let dateFormat = changeFormat.getMonth() + " / " + changeFormat.getDate() + " / " + changeFormat.getFullYear();
-         let fiveDayObj = {
-            tempMin: dayData.main.temp_min,
-            tempMax: dayData.main.temp_max,
-            humidityDaily: dayData.main.humidity,
-            icon: dayData.weather[0].icon,
-            currentCondition: dayData.weather[0].main,
-            date: dateFormat,
-          };
-          console.log(fiveDayObj, "date check");
+        let dateFormat =
+          changeFormat.getMonth() +
+          " / " +
+          changeFormat.getDate() +
+          " / " +
+          changeFormat.getFullYear();
+        let fiveDayObj = {
+          tempMin: dayData.main.temp_min,
+          tempMax: dayData.main.temp_max,
+          humidityDaily: dayData.main.humidity,
+          icon: dayData.weather[0].icon,
+          currentCondition: dayData.weather[0].main,
+          date: dateFormat,
+        };
+        console.log(fiveDayObj, "date check");
 
-        let eachDay = document.querySelector(".day");
         let eachContainer = document.createElement("div");
         eachContainer.setAttribute("class", "card");
         let renderIcon =
@@ -151,15 +196,14 @@ function fiveDay(lon, lat) {
                 <div class="words">Max Temp: ${fiveDayObj.tempMax}</div>
                 <div class="words">Humidity: ${fiveDayObj.humidityDaily}</div>`;
         eachDay.appendChild(eachContainer);
-        console.log(fiveDayObj.tempMin, "w00t");
+        city.value = '';
       }
     })
     .catch(console.err);
 }
 
+// Shows the weather on the screen.
 function showWeather(attr) {
-  let cityLocation = document.querySelector(".current-city");
-  cityLocation.innerHTML = city.value;
   console.log(attr);
   let clouds = document.querySelector("#clouds");
   let temp = document.querySelector("#temp");
@@ -175,59 +219,7 @@ function showWeather(attr) {
   humidity.innerHTML = humidText;
 }
 
-// function showFiveDay(attr) {
-//         let tempMin = attr.tempMin;
-//         let tempMax = attr.tempMax;
-//         let dayBox = attr.date;
-//         // let dayBox2 = new Date(dayBox);
-//         let currentCondition = attr.currentCondition;
-//         let icon = attr.icon;
-//         let humidityDaily = attr.humidityDaily;
-//         // console.log(dayBox2.getMonth()+1, dayBox2.getDay(), "iso");
-
-//         let minTemp = document.querySelector(".min");
-//         let maxTemp = document.querySelector(".max");
-//         let iconWeather = document.querySelector("#icon");
-//         let condition = document.querySelector(".condition");
-//         let date = document.querySelector("#date");
-//         let humidity5 = document.querySelector(".humidity5");
-
-//         minTemp.innerHTML = tempMin;
-//         maxTemp.innerHTML = tempMax;
-//         date.innerHTML = dayBox;
-//         condition.innerHTML = currentCondition;
-//         iconWeather.innerHTML = icon;
-//         humidity5.innerHTML = humidityDaily;
-
-// }
-// MAP SORT FILTER
-//     getLocation: (ev) => {
-//         let opts = {
-//             enableHighAccuracy: true,
-//             timeout: 1000 * 10, // 10 Seconds
-//             maximumAge: 1000 * 60 * 5, // 5 Minutes
-//         };
-//         navigator.geolocation.getCurrentPosition(app.ftw, app.wtf, opts);
-//     },
-//     ftw: (position) => {
-//     //got position
-//     document.querySelector('#city-search');
-//     position.coords.latitude.toFixed(2);
-
-// },
-
-//     wtf: (err) => {
-//         //geolocation failed
-//         console.error(err);
-//     },
-
-//     showWeather: (resp) => {
-//         console.log(resp)
-//         let row = document.querySelector('.weather.row');
-//         //clear out the old weather and add the new
-//     }
-// };
-
-// app.init();
-
+// Add event listener to search button.
 searchButton.addEventListener("click", getGeo);
+
+showPreviousSearch();

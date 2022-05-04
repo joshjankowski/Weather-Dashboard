@@ -58,16 +58,16 @@ label {
     padding: 0.15em;
 }
 
-#search {
+.button-search {
     margin: 0.8em;
     background-color: rgb(59, 158, 224);
     color: white;
     font-size: 1em;
-    width: 100%;
+    max-width: 100%;
     cursor: pointer;
 }
 
-#search:hover {
+.button-search:hover {
     background-color: white;
     color: rgb(59, 158, 224);
 }
@@ -118,4 +118,10 @@ background-color: rgb(25, 50, 104);
 .previous-button:hover {
     background-color: white;
     color: rgb(59, 158, 224);
+}
+
+.recent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
