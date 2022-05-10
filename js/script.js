@@ -12,10 +12,12 @@ let cityLocation = document.querySelector(".current-city");
 
 // Stores in local storage.
 function store(search) {
-  let searchedCity = JSON.parse(
-    localStorage.getItem("Previous-Search" || "[]")
-  );
+  // searchedCity = JSON.parse(
+  //   localStorage.getItem("Previous-Search" || "[]")
+  // );
+  console.log(search, "whit")
   searchedCity.push(search);
+  console.log("here  we are")
   localStorage.setItem("Previous-Search", JSON.stringify(searchedCity));
   // console.log(search,searchedCity,  "s")
   console.log("went ot the set", localStorage);
